@@ -31,43 +31,49 @@ updateGrid grid = grid A.// (concatMap (\(p, c) -> (changeGridBNet grid p c) ++ 
 
 bv (us, uw, iv) = BVert us uw iv
 
-bn = BNet (V.fromList $ take 10 $ repeat False) 
-     -- Color vertices
-     [bv (\g p v -> v V.! 1 || v V.! 0 && v V.! 1
-      , \_ _ _ -> []
-      , V.fromList [0,1]), 
-      bv (\g p v -> v V.! 0
-      , \_ _ _ -> [] 
-      , V.fromList [0]),
-      bv (\g p v -> if v V.! 0 && v V.! 1 then True else False
-      , \_ _ _ -> []       
-      , V.fromList [0,1]),
-     -- State vertices
-      bv (\g p v -> v V.! 3 || (not.and) $ map (v V.!) [6..9]
-      , \_ _ _ -> []             
-      , V.fromList [3,6,7,8,9]),  
-      bv (\g p v -> v V.! 3
-      , \_ _ _ -> []                   
-      , V.fromList [3]),   
-      bv (\g p v -> v V.! 4
-      , \_ _ _ -> []                   
-      , V.fromList [4]),    
-      bv (\g p v -> v V.! 5
-      , \_ _ _ -> []                   
-      , V.fromList [5]),     
-     -- Border vertices
-      bv (\g p v -> v V.! 3
-      , \_ _ _ -> []                   
-      , V.fromList [3]),      
-      bv (\g p v -> v V.! 5
-      , \_ _ _ -> []                   
-      , V.fromList [5]),       
-      bv (\g p v -> v V.! 5
-      , \_ _ _ -> []                   
-      , V.fromList [5]),        
-      bv (\g p v -> v V.! 5
-      , \_ _ _ -> []                   
-      , V.fromList [5])]
+zero_state = take 11 $ repeat False
+one_below = (replicate 7 False) ++ [False, False, True, False]
+one_right = (replicate 7 False) ++ [False, False, False, True] 
+one_top = (replicate 7 False) ++ [True, False, False, False] 
+one_left = (replicate 7 False) ++ [False, True, False, False]  
+
+-- bn s0 = BNet (V.fromList s0) 
+--      -- Color vertices
+--      [bv (\g p (BNet s v) -> s V.! 1 || s V.! 0 && s V.! 1
+--       , \_ _ _ -> []
+--       , V.fromList [0,1]), 
+--       bv (\g p (BNet s v) -> s V.! 0
+--       , \_ _ _ -> [] 
+--       , V.fromList [0]),
+--       bv (\g p (BNet s v) -> if s V.! 0 && s V.! 1 then True else False
+--       , \_ _ _ -> []       
+--       , V.fromList [0,1]),
+--      -- State vertices
+--       bv (\g p (BNet s v) -> s V.! 3 || ((not.and) $ map (s V.!) [6..9])
+--       , \_ _ _ -> []             
+--       , V.fromList [3,6,7,8,9]),  
+--       bv (\g p (BNet s v) -> s V.! 3
+--       , \g (x,y) c -> [((x, y + 1), bn)]                   
+--       , V.fromList [3]),   
+--       bv (\g p (BNet s v) -> s V.! 4
+--       , \g (x,y) c -> [((x - 1, y), bn)]                    
+--       , V.fromList [4]),    
+--       bv (\g p (BNet s v) -> s V.! 5
+--       , \g (x,y) c -> [((x, y - 1), bn)]                    
+--       , V.fromList [5]),     
+--      -- Border vertices
+--       bv (\g p (BNet s v) -> s V.! 3
+--       , \_ _ _ -> []                   
+--       , V.fromList [3]),      
+--       bv (\g p (BNet s v) -> s V.! 5
+--       , \_ _ _ -> []                   
+--       , V.fromList [5]),       
+--       bv (\g p (BNet s v) -> s V.! 5
+--       , \_ _ _ -> []                   
+--       , V.fromList [5]),        
+--       bv (\g p (BNet s v) -> s V.! 5
+--       , \_ _ _ -> []                   
+--       , V.fromList [5])]
    
 
 -- Draw Grid with cells
