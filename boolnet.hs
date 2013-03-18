@@ -59,41 +59,45 @@ bn s0 = BNet (V.fromList s0)
       , V.fromList [0,1]),
      -- State vertices
      --
-      bv (\g p (BNet s v) -> s V.! 3 || (and $ map ((not).(s V.!)) [7..10])
-      , \g (x,y) (BNet s v) -> if (not.isJust $ g |> (x, y + 1)) && (and $ map ((not).(s V.!)) [7..10])
+      bv (\g p (BNet s v) -> s V.! 3 || or (map (s V.!) [7..10]) || (and $ map ((not).(s V.!)) [7..10])
+      , \g (x,y) (BNet s v) -> if (not.isJust $ g |> (x, y + 1)) -- && (and $ map ((not).(s V.!)) [7..10])
                                 then 
-                                    [((x, y + 1), Just $ bn one_below)] 
+                                    [((x, (y + 1) `mod` 21), Just $ bn one_below)] 
                                 else 
                                 [] 
       , V.fromList [3,7,8,9]),  
 
-      bv (\g (x,y) (BNet s v) -> s V.! 3
+      bv (\g (x,y) (BNet s v) -> s V.! 3 || s V.! 10
       , \g (x,y) (BNet s v) -> if (not.isJust $ g |> (x - 1, y)) && s V.! 3 
                                 then 
-                                    [((x - 1, y), Just $ bn one_right)] 
+                                    [((if x > 0 then x - 1 else 20, y), Just $ bn one_right)] 
                                 else 
                                     []                    
       , V.fromList [3]),   
 
-      bv (\g (x,y) (BNet s v) -> s V.! 4
+      bv (\g (x,y) (BNet s v) -> s V.! 4 || s V.! 7
       , \g (x,y) (BNet s v) -> if (not.isJust $ g |> (x, y - 1)) && s V.! 4
                                 then 
-                                    [((x, y - 1), Just $ bn one_top)] 
+                                    [((x, if y > 0 then y - 1 else 20), Just $ bn one_top)] 
                                 else
                                     []                    
       , V.fromList [4]),    
 
-      bv (\g (x,y) (BNet s v) -> s V.! 5
+      bv (\g (x,y) (BNet s v) -> s V.! 5 
       , \g (x,y) (BNet s v) -> if (not.isJust $ g |> (x + 1, y)) && s V.! 5
                                 then 
-                                    [((x + 1, y), Just $ bn one_left)]
+                                    [(((x + 1) `mod` 21, y), Just $ bn one_left)]
                                 else 
                                     []                     
       , V.fromList [5]),     
 
      -- Border vertices
-      bv (\g (x,y) (BNet s v) -> (and $ map ((not).(s V.!)) [7..10]) || s V.! 3 || ((isJust $ g |> (x,y+1)) && (bnState.fromJust) (g |> (x, y+1)) V.! 9)
-      , \_ _ _ -> []                   
+      bv (\g (x,y) (BNet s v) -> ((isJust $ g |> (x,y+1)) && (bnState.fromJust) (g |> (x, y+1)) V.! 9)
+      , \g (x,y) (BNet s v) -> if (not.isJust $ g |> (x, y + 1)) -- && (and $ map ((not).(s V.!)) [7..10])
+                                then 
+                                    [((x, (y + 1) `mod` 21), Just $ bn one_below)] 
+                                else 
+                                []                                             
       , V.fromList [3]),      
       bv (\g (x,y) (BNet s v) -> s V.! 3 || ((isJust $ g |> (x-1,y)) && (bnState.fromJust) (g |> (x-1, y)) V.! 10)
       , \_ _ _ -> []                   
@@ -133,7 +137,7 @@ drawGrid screen grid = do
 
 sdlUpdate screen grid step = do
     let new_grid = updateGrid grid
-    threadDelay 1000000
+    threadDelay 100000
     drawGrid screen new_grid
     sdlUpdate screen new_grid (step + 1)
 
